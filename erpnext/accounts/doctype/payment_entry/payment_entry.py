@@ -1795,7 +1795,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	bank = get_bank_cash_account(doc, bank_account)
 
 	paid_amount, received_amount = set_paid_amount_and_received_amount(
-		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
+		dt,party_amount ,party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
 	)
 
 	paid_amount, received_amount, discount_amount = apply_early_payment_discount(
@@ -1978,9 +1978,7 @@ def set_payment_type(dt, doc):
 
 def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_currency, doc):
 	grand_total = outstanding_amount = 0
-	if party_amount:
-		grand_total = outstanding_amount = party_amount
-	elif dt in ("Sales Invoice", "Purchase Invoice"):
+	if dt in ("Sales Invoice", "Purchase Invoice"):
 		if party_account_currency == doc.company_currency:
 			grand_total = doc.base_rounded_total or doc.base_grand_total
 		else:
@@ -2017,10 +2015,12 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 
 
 def set_paid_amount_and_received_amount(
-	dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
+	dt,party_amount, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
 ):
 	paid_amount = received_amount = 0
-	if party_account_currency == bank.account_currency:
+	if party_amount:
+		paid_amount = received_amount = party_amount
+	elif party_account_currency == bank.account_currency:
 		paid_amount = received_amount = abs(outstanding_amount)
 	elif payment_type == "Receive":
 		paid_amount = abs(outstanding_amount)
